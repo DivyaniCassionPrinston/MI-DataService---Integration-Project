@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-container-ins
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345  # Replace with actual root password
+      MYSQL_DATABASE: insurance    # Replace with your database name
+    volumes:
+      - ./mysql-scripts:/docker-entrypoint-initdb.d 
+    ports:
+      - "3306:3306"
+    networks:
+      - mynetwork
+
+
+  
+  micro-integrator:
+    image: openjdk:17
+    container_name: micro-integrator-ins
+    working_dir: /home/wso2/MI  # Path to your MI directory inside the container
+    volumes:
+      - ./MI:/home/wso2/MI  # Mount your MI directory here
+    command: bash -c "cd /home/wso2/MI/bin && ./micro-integrator.sh"
+    depends_on:
+      - mysql
+    ports:
+      - "8290:8290" 
+      - "8253:8253"
+      - "9201:9201"
+      - "9164:9164"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/employees-api" name="employees-api" xmlns="http://ws.apache.org/ns/synapse">
+    <!-- Get all employees -->
+    <resource methods="GET" uri-template="/employees">
+        <inSequence>
+            <send>
+                <endpoint>
+                    <http method="GET" uri-template="http://localhost:8290/services/InsuranceEmployeesService/employees"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <property name="messageType" scope="axis2" value="application/json"/>
+            <jsontransform>
+                <property name="synapse.commons.json.output.autoPrimitive" value="false"/>
+            </jsontransform>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "error", "message": "Error retrieving employees"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <respond/>
+        </faultSequence>
+    </resource>
+    <!-- Get employee by ID -->
+    <resource methods="GET" uri-template="/employee/{employee_id}">
+        <inSequence>
+            <property name="uri.var.employee_id" expression="get-property('uri.var.employee_id')"/>
+            <send>
+                <endpoint>
+                    <http method="GET" uri-template="http://localhost:8290/services/InsuranceEmployeesService/employee/{uri.var.employee_id}"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <property name="messageType" scope="axis2" value="application/json"/>
+            <jsontransform>
+                <property name="synapse.commons.json.output.autoPrimitive" value="false"/>
+            </jsontransform>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "error", "message": "Error retrieving employee"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <respond/>
+        </faultSequence>
+    </resource>    <!-- Create employee -->
+    <resource methods="POST" uri-template="/employee">
+        <inSequence>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <property name="ContentType" value="application/json" scope="axis2"/>
+            <property name="HTTP_METHOD" scope="axis2" value="POST"/>
+            <!-- Extract JSON values from nested employee object -->
+            <property name="uri.var.first_name" expression="json-eval($.employee.first_name)"/>
+            <property name="uri.var.last_name" expression="json-eval($.employee.last_name)"/>
+            <property name="uri.var.role" expression="json-eval($.employee.role)"/>
+            <property name="uri.var.email" expression="json-eval($.employee.email)"/>
+            <property name="uri.var.phone" expression="json-eval($.employee.phone)"/>
+            <property name="uri.var.address" expression="json-eval($.employee.address)"/>
+            <send>
+                <endpoint>
+                    <http method="POST" uri-template="http://localhost:8290/services/InsuranceEmployeesService/employee?employee_id={uri.var.employee_id}&amp;first_name={uri.var.first_name}&amp;last_name={uri.var.last_name}&amp;role={uri.var.role}&amp;email={uri.var.email}&amp;phone={uri.var.phone}&amp;address={uri.var.address}"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "success", "message": "Employee Successfully Created!"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <jsontransform>
+                <property name="synapse.commons.json.output.autoPrimitive" value="false"/>
+            </jsontransform>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "error", "message": "Error creating employee"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <respond/>
+        </faultSequence>
+    </resource>    <!-- Update employee -->
+    <resource methods="PUT" uri-template="/employee/{employee_id}">
+        <inSequence>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <property name="ContentType" value="application/json" scope="axis2"/>
+            <property name="HTTP_METHOD" scope="axis2" value="PUT"/>
+            <property name="uri.var.employee_id" expression="get-property('uri.var.employee_id')"/>
+            <property name="uri.var.first_name" expression="json-eval($.employee.first_name)"/>
+            <property name="uri.var.last_name" expression="json-eval($.employee.last_name)"/>
+            <property name="uri.var.role" expression="json-eval($.employee.role)"/>
+            <property name="uri.var.email" expression="json-eval($.employee.email)"/>
+            <property name="uri.var.phone" expression="json-eval($.employee.phone)"/>
+            <property name="uri.var.address" expression="json-eval($.employee.address)"/>
+            <send>
+                <endpoint>
+                    <http method="PUT" uri-template="http://localhost:8290/services/InsuranceEmployeesService/employee/{uri.var.employee_id}?first_name={uri.var.first_name}&amp;last_name={uri.var.last_name}&amp;role={uri.var.role}&amp;email={uri.var.email}&amp;phone={uri.var.phone}&amp;address={uri.var.address}"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "success", "message": "Employee Successfully Updated!"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <jsontransform>
+                <property name="synapse.commons.json.output.autoPrimitive" value="false"/>
+            </jsontransform>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "error", "message": "Error updating employee"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <respond/>
+        </faultSequence>
+    </resource>
+    <!-- Delete employee -->
+    <resource methods="DELETE" uri-template="/employee/{employee_id}">
+        <inSequence>
+            <property name="uri.var.employee_id" expression="get-property('uri.var.employee_id')"/>
+            <send>
+                <endpoint>
+                    <http method="DELETE" uri-template="http://localhost:8290/services/InsuranceEmployeesService/employee/{uri.var.employee_id}"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "success", "message": "Employee Successfully Deleted!"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <jsontransform>
+                <property name="synapse.commons.json.output.autoPrimitive" value="false"/>
+            </jsontransform>
+            <respond/>
+        </outSequence>
+        <faultSequence>
+            <payloadFactory media-type="json">
+                <format>{"status": "error", "message": "Error deleting employee"}</format>
+                <args/>
+            </payloadFactory>
+            <property name="messageType" value="application/json" scope="axis2"/>
+            <respond/>
+        </faultSequence>
+    </resource>
+</api>
